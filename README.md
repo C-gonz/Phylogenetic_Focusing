@@ -1,7 +1,7 @@
 # Phylogenetic_Focusing
 The program is tailored to assess the phylogenetic history of specific gene families via large scale proteome datasets from taxa of interest. Phyfocus operates on the premise that the most rigorous phylogenetic assessment of gene evolution is one that includes all possible sequence data in a phylogeny for each study species at the outset, then excises ("focuses") a monophyletic subtree for each species containing the gene families of interest, before filtering the data and ptoviding an integrated, multi-species gene tree.
 
-## Core Scripts in PhyFocus
+## Core Scripts
 
 #### phyfocus.sh
 The central PhyFocus script. Manages the initial BLAST, initial phylogeny, and subtree extraction steps. Currently the user must edit Tree_Editor.R to their specifications before use. Phyfocus currently runs automatically up till Alignment_Editor.py.
@@ -13,7 +13,7 @@ Used to extract a focused subtree from the initial phylogeny for each study spec
 Aids with subtree data filtering. Removes sequences that cause excessive alignment gaps according to user-specified gap length and
 gap frequency cutoffs. Current recommendation is to manually inspect the concatenated subtree alignment provided by Phyfocus.sh, then run Alignment_Editor.py. Manual running of IQ-Tree on the output alignment is required.
 
-### Accessory Scripts in Phyfocus
+## Accessory Scripts 
 
 #### header_translator.py
 Helps the user correlate original BLAST sequence headers with the genus_#### headers used by phyfocus. Produces a tab-delimited file correlating these headers for all input proteome data.
