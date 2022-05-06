@@ -1,4 +1,4 @@
-# Phylogenetic_Focusing
+# Phylogenetic_Focusing v2.0.0
 The program is tailored to assess the phylogenetic history of specific gene families via large scale proteome datasets from taxa of interest. Phyfocus operates on the premise that the most rigorous phylogenetic assessment of gene evolution is one that includes all possible sequence data in a per species phylogeny at the outset, excising ("focusing") monophyletic subtrees containing the gene families of interest, then filtering the data and ptoviding a concatenated, multi-species gene tree for the gene families of interest.
 
 ## Core Scripts
