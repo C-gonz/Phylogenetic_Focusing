@@ -3,7 +3,7 @@
 help() {
 cat << EOF
 ----------------------------------------------
-PhyFocus v2.1 (June 21 2023)
+PhyFocus v2.1 (July 27 2023)
 github repository: https://github.com/C-gonz/Phylogenetic_Focusing
 See "README" for detailed instructions on the overall Phyfocus pipeline
 ----------------------------------------------
