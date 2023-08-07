@@ -190,10 +190,41 @@ Upon completing alignment_editor.py, running IQtree will complete Step 6 and pro
 
 ## Assessing Phyfocus Phylogenies
 
+### Fixing Target, Anchor, & Root Sequence Names
+The focused phylogeny from step 6 (./final_tree_dataset/filtering_output/final_tree_seqs_ali.fa_edited_ali.fa.treefile) will include all target, anchor, and root sequences; however, their header names from the query & root files may have been replaced with phyfocus numerical headers. If the original header names are desired for tree annotations, do the following:
+
+1. Obtain query, anchor, and root header names in the main working directory:
+
+        cat ./queries.fa ./roots.fa | grep ">" | grep -E "[A-Za-z0-9_]+" > headers.txt
+
+2. Identify which query/root seqs have had their headers changed:
+
+        grep -B 3 -f ./headers.txt ./final_tree_dataset/filtering_output/concat_tip_seqs_cdhit.fa.clstr
+
+Changed entries in this CD-HIT output will denote a 100% match; below, Homo_Melanopsin was replaced with the numerical header Homo_94301:         
+> >Cluster 248
+> 0    478aa, >Homo_94301... *
+> 1    478aa, >Homo_Melanopsin... at 100.00%
+
+3. Change any numerical headers in "final_tree_seqs_ali.fa_edited_ali.fa.treefile" that replaced the desired query/root headers. (Using find/replace via a word processor is a simple approach.) 
+
 ### Viewing Phylogenies
-The Newick formatted data of step 6 (./final_tree_dataset/filtering_output/final_tree_seqs_ali.fa_edited_ali.fa.treefile) can be copied into a viewer like FigTree for rooting with the root sequences clade and annotating features of interest. 
+The Newick formatted data in the step 6 .treefile can be copied into a viewer like FigTree for rooting with the root sequences clade and annotating features of interest. 
 (Rambaut, A. (2018) FigTree v1. 4.4: a graphical viewer of phylogenetic trees. Available from <http://tree.bio.ed.ac.uk/software/figtree/>.) 
 
+### Annotating Phylogenies
+Phyfocus phylogenies will have all tree tips labeled using the "genus_####" numerical header nomenclature. For identifying sequences/clades, the numerical headers can be copied into a .txt file in the main working directory and looked up via the "header_translation_table" TSV:
+
+    grep -f headers.txt header_translation_table.tsv
+
+The results will correlate the given numerical headers with their originally provided FASTA headers. For example:
+> >Acanthaster_17320    >XP_022096382.1 pinopsin-like [Acanthaster planci]
+> >Acanthaster_17794    >XP_022096856.1 rhodopsin-like [Acanthaster planci]
+> >Acanthaster_20160    >XP_022099222.1 pinopsin-like [Acanthaster planci]
+> >Acanthaster_20161    >XP_022099223.1 rhodopsin-like [Acanthaster planci]
+ 
+ Gene family clades, etc. can then be annotated on the tree in the chosen tree viewing program.
+ 
 ### Visualizing Node Support
 The Ultrafast bootstrap and SH-aLRT node values provided by IQtree indicate which nodes are confidentally supported; IQtree recommends a benchmark of UFboot >= 95% and SH-aLRT >= 80% (http://www.iqtree.org/doc/Frequently-Asked-Questions). To collapse unsupported nodes into a polytomy, the following protocol may be used:
 
