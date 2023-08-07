@@ -202,9 +202,9 @@ The focused phylogeny from step 6 (./final_tree_dataset/filtering_output/final_t
         grep -B 3 -f ./headers.txt ./final_tree_dataset/filtering_output/concat_tip_seqs_cdhit.fa.clstr
 
 Changed entries in this CD-HIT output will denote a 100% match; below, Homo_Melanopsin was replaced with the numerical header Homo_94301:         
-> >Cluster 248
-> 0    478aa, >Homo_94301... *
-> 1    478aa, >Homo_Melanopsin... at 100.00%
+> \>Cluster 248  
+> 0    478aa, >Homo_94301... *  
+> 1    478aa, >Homo_Melanopsin... at 100.00%  
 
 3. Change any numerical headers in "final_tree_seqs_ali.fa_edited_ali.fa.treefile" that replaced the desired query/root headers. (Using find/replace via a word processor is a simple approach.) 
 
@@ -218,10 +218,10 @@ Phyfocus phylogenies will have all tree tips labeled using the "genus_####" nume
     grep -f headers.txt header_translation_table.tsv
 
 The results will correlate the given numerical headers with their originally provided FASTA headers. For example:
-> >Acanthaster_17320    >XP_022096382.1 pinopsin-like [Acanthaster planci]
-> >Acanthaster_17794    >XP_022096856.1 rhodopsin-like [Acanthaster planci]
-> >Acanthaster_20160    >XP_022099222.1 pinopsin-like [Acanthaster planci]
-> >Acanthaster_20161    >XP_022099223.1 rhodopsin-like [Acanthaster planci]
+> \>Acanthaster_17320    >XP_022096382.1 pinopsin-like [Acanthaster planci]  
+> \>Acanthaster_17794    >XP_022096856.1 rhodopsin-like [Acanthaster planci]  
+> \>Acanthaster_20160    >XP_022099222.1 pinopsin-like [Acanthaster planci]  
+> \>Acanthaster_20161    >XP_022099223.1 rhodopsin-like [Acanthaster planci]  
  
  Gene family clades, etc. can then be annotated on the tree in the chosen tree viewing program.
  
