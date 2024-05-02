@@ -13,7 +13,7 @@ PhyFocus consists of 6 steps:
 
 # Running PhyFocus
 
-## Dependencies & Setup
+<details> <summary><H2> Dependencies & Setup </H2></summary>
 
 ### Phyfocus Dependencies:
 Programs Phyfocus requires in the user PATH
@@ -41,10 +41,10 @@ For an exceptionally large  phylogeny with 3200 sequences, the program timeframe
 - Step6 Phylogeny:  232h (~ 10 days)
 
 Note that more reasonably sized runs can take 7-10 days total. Less CPU & RAM may be feasible, but could incur longer runtimes or errors if RAM depletes.
+</details> <!-- End Dependencies & Setup -->
 
 
-
-## Testing Installation
+<details> <summary><H2> Testing Installation </H2></summary>
 To ensure Phyfocus works properly, follow these steps.
 
 1. Ensure the following 5 scripts and 1 directory are downloaded to your desired working directory:
@@ -61,9 +61,10 @@ To ensure Phyfocus works properly, follow these steps.
 
         ./sample_data/final_tree_dataset/filtering_output/final_tree_seqs_ali.fa
 
+</details> <!-- End Testing Installation -->
 
 
-## Running Phyfocus on Your Data 
+<details> <summary><H2> Running Phyfocus on Your Data </H2></summary>
 PhyFocus consists of 6 steps:
 1) Identifying protein datasets per species
 2) Generating unfocused tree per species
@@ -186,9 +187,10 @@ Upon completing alignment_editor.py, running IQtree will complete Step 6 and pro
 
     iqtree -s final_tree_seqs_ali.fa_edited_ali.fa -m MFP+C60 -alrt 1000 -bb 1000 -nt 24
 
+</details> <!-- End Running Phyfocus on Your Data -->
 
 
-## Assessing Phyfocus Phylogenies
+<details> <summary><H2> Assessing Phyfocus Phylogenies </H2></summary>
 
 ### Fixing Target, Anchor, & Root Sequence Names
 The focused phylogeny from step 6 (./final_tree_dataset/filtering_output/final_tree_seqs_ali.fa_edited_ali.fa.treefile) will include all target, anchor, and root sequences; however, their header names from the query & root files may have been replaced with phyfocus numerical headers. If the original header names are desired for tree annotations, do the following:
@@ -250,10 +252,10 @@ The Ultrafast bootstrap and SH-aLRT node values provided by IQtree indicate whic
 - Use "Collapse Nodes by Support" option twice: UFBoot at 95, and SH-aLRT at 80. 
 - Export result as a nexus file, the collapsed tree can now be viewed or edited in Figtree, etc. as before.
 
+</details> <!-- End Assessing Phyfocus Phylogenies -->
 
 
-## Accessory Scripts Run by Phyfocus  
-These necessary scripts are not executed by the user; these details are purely for informational purposes.
+<details> <summary><H2> Accessory Scripts Run by Phyfocus </H2></summary>These necessary scripts are not executed by the user; these details are purely for informational purposes.
 
 ### Tree_Editor.R
 Used to extract a focused subtree from the initial phylogeny for each study species (step 3), identified by finding the most recent common ancestor of the user-specified target and anchor sequences. The bait and anchor sequence headers are specified by the user via the TSV fasta headers file. 
@@ -264,9 +266,11 @@ Produces a TSV correlating original BLAST sequence headers with the genus_#### h
 ### delim_converter.py
 Used to convert the space-delimited HMMER output txt file to a TSV for downstream use.
 
+</details> <!-- End Accessory Scripts Run by Phyfocus -->
 
 
-## Managing Errors & Reruns
+<details> <summary><H2> Managing Errors & Reruns </H2></summary>
+
 Phyfocus (and programs it uses like IQtree) are designed to cancel the run if certain errors or issues occur. The out_log.txt file will indicate the last steps taken, while specific error messages are recorded in error_log.txt. 
 
 Once the error has been dealt with, phyfocus.sh can be restarted at the last valid step by re-running the same command originally used, provided the contents of its working directory have not been changed by the user. The restarted run date and all steps skipped are always appended to the out_log.txt file before standard output logging resumes.
@@ -280,3 +284,5 @@ The following represent some errors you may encounter in error_log.txt, along wi
     cd ./align
     iqtree -safe -s Homo_protein.faa_FIX_hits.fa_ali.fa -m MFP+C60 -alrt 1000 -bb 1000-nt 24 2>> ../error_log.txt | tee -a ../out_log.txt
     - Once complete, phyfocus.sh can be restarted as normal using the original input commands.
+
+</details> <!-- End Managing Errors & Reruns -->
