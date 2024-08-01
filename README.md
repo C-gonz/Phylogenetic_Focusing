@@ -228,7 +228,8 @@ The results will correlate the given numerical headers with their originally pro
  Gene family clades, etc. can then be annotated on the tree in the chosen tree viewing program.
  
 ### Visualizing Node Support
-The Ultrafast bootstrap and SH-aLRT node values provided by IQtree indicate which nodes are confidentally supported; IQtree recommends a benchmark of UFboot >= 95% and SH-aLRT >= 80% (http://www.iqtree.org/doc/Frequently-Asked-Questions). To collapse unsupported nodes into a polytomy, the following protocol may be used:
+The Ultrafast bootstrap and SH-aLRT node values provided by IQtree indicate which branches are confidentally supported; as of 2023, IQtree reports these confidence values in parentheses as (SH-aLRT support % / ultrafast bootstrap support %).
+IQtree recommends a benchmark of SH-aLRT >= 80% and UFboot >= 95% (http://www.iqtree.org/doc/Frequently-Asked-Questions). To collapse unsupported nodes into a polytomy, the following protocol may be used:
 
 1. Extract node values via Tree Graph 2 (<http://treegraph.bioinfweb.info/>)
         - Run GUI via .jar file. 
@@ -240,7 +241,7 @@ The Ultrafast bootstrap and SH-aLRT node values provided by IQtree indicate whic
 
 2. Change UFboot/SH-aLRT values to 1 value per column
 - Open exported .txt in excel/numbers as TSV
-- Change the label column header to "UF-Boot" and add a new column: "SH-aLRT"
+- Change the label column header to "SH-aLRT" and add a new column: "UF-Boot"
 - Export table as CSV
 - Open CSV in a text editor, use find+replace to change all "/" to ","
 - Open CSV in excel/numbers again, delete the empty column at right.
@@ -249,7 +250,7 @@ The Ultrafast bootstrap and SH-aLRT node values provided by IQtree indicate whic
 - import CSV into the open Tree Graph 2 window via "import table as node/branch data" (all files format, no skipped lines, first line contains headers. Be sure to check values separated by ",")
 - "select matching key columns" step correlates same data in the table and tree. Use unique node names column for both.
 - Set node data type for UFboot and SH-aLRT as "new hidden branch data with specified ID." 
-- Use "Collapse Nodes by Support" option twice: UFBoot at 95, and SH-aLRT at 80. 
+- Use "Collapse Nodes by Support" option twice: SH-aLRT at 80, and UFBoot at 95. 
 - Export result as a nexus file, the collapsed tree can now be viewed or edited in Figtree, etc. as before.
 
 </details> <!-- End Assessing Phyfocus Phylogenies -->
