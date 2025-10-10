@@ -61,11 +61,11 @@ focus_func <- function(iq_tree, taxa) {
   ## extract the focusing clade as a new phylogeny and plot for records
   focusedtree <- extract.clade(rootedtree, focusedclade)
   plot.phylo(focusedtree)
-  title(paste(treename,': focused'))
+  title(paste('previous tree focused'))
 
   # 3. Record focused trees () & tip names ("Genus_tips.txt")
-  write (focusedtree$tip.label, file=paste(treename, "_tips.txt"))
-  write.tree(focusedtree, file=paste(treename, "_focused.treefile"))
+  write (focusedtree$tip.label, file=paste(treename, "tips.txt", sep="_"))
+  write.tree(focusedtree, file=paste(treename, "focused.treefile", sep="_"))
   #genera <- unlist(strsplit(focusedtree$tip.label,split="_"))[1]
 }
 

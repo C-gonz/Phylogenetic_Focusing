@@ -1,0 +1,16 @@
+name: phyfocus_env
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+  - r
+dependencies:
+  - biopython
+  - blast=2.16.0
+  - busco=5.8.3
+  - cd-hit=4.8.1
+  - hmmer=3.4
+  - iqtree=2.4.0
+  - mafft=7.526
+  - python
+  - r-base

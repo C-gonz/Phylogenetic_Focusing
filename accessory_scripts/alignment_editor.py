@@ -6,11 +6,11 @@ import Bio.AlignIO
 import subprocess
 
 # Define a function to produce a MAFFT MSA file and return the file's name as a string
-def msa(fasta, seqs=None):
+def msa(fasta, arg, seqs=None):
     # for edited fasta data, use final_dict from window() to avoid writing gap-causing seqs to file
     try:
         with open("{0}".format(fasta), "r") as original_fasta:
-            with open("{0}_edited".format(fasta), "w") as edited_fasta:
+            with open("{0}_edited_{1}_{2}".format(fasta, arg.window, arg.gappercent), "w") as edited_fasta:
                 for line in original_fasta:
                     # Check if fasta headers are in dict of problem seqs
                     if line[0] == ">" and line.rstrip("\n") in seqs.keys():
@@ -22,15 +22,15 @@ def msa(fasta, seqs=None):
                     if good_seq:
                         edited_fasta.write("{0}".format(line))
         # Align the edited fatsa file in MAFFT
-        subprocess.run("mafft {0}_edited > {0}_edited_ali.fa".format(fasta), shell=True)
-        print("MAFFT FFT-NS-2 (fast; progressive method) realignment of edited seqs complete.\n")
-        return "{0}_edited_ali.fa".format(fasta)
+        subprocess.run("{3} {0}_edited_{1}_{2} > {0}_edited_{1}_{2}_ali.fa".format(fasta, arg.window, arg.gappercent, arg.align), shell=True)
+        print("{0} realignment of edited seqs complete.\n".format(arg.align))
+        return "{0}_edited_{1}_{2}_ali.fa".format(fasta, arg.window, arg.gappercent)
     except IOError as error:
         print(error)
 
 # Define a sliding window function that identifies problematic alignment gaps
 def window(ali, arg):
-    print("**********\nBeginning assessment of gap-causing seqs in MAFFT alignment...")
+    print("**********\nBeginning assessment of gap-causing seqs in user's alignment...")
     start_slice = 0
     final_dict = {}
     # Given (L - k + 1 = # k-mers), iterate # kmer/window times
@@ -67,9 +67,9 @@ def window(ali, arg):
 
 # Write window() parameters and results to output file
 def results_file(arg, original_ali, edited_ali, seqs):
-    print("**********\nWriting summary results of alignment_editor to ./alignment_editor.out")
+    print("**********\nWriting summary results of alignment_editor to ./alignment_editor_{0}_{1}.out".format(arg.window,arg.gappercent))
     try:
-        with open("alignment_editor.out", "w") as out_file:
+        with open("alignment_editor_{0}_{1}.out".format(arg.window,arg.gappercent), "w") as out_file:
             # Note program run date and location
             out_file.write("Alignment_editor.py completed {0}\n".format(datetime.datetime.now()))
             out_file.write("Analysis located at {0}\n".format(os.getcwd()))
@@ -78,11 +78,12 @@ def results_file(arg, original_ali, edited_ali, seqs):
             out_file.write("input_fasta_file: {0}\n".format(arg.file))
             out_file.write("window_size: {0}\n".format(arg.window))
             out_file.write("gap_percent: {0}\n".format(arg.gappercent))
+            out_file.write("MAFFT alignment method: {0}\n".format(arg.align))
             # Writes tab-delimited table of summary results
             out_file.write("\nsummary of results:\n")
             out_file.write("length\tnum_seqs\tfile_name\n")
             out_file.write("{0}bp\t{1}\t{2}\n".format(original_ali.get_alignment_length(), len(original_ali), arg.file))
-            out_file.write("{0}bp\t{1}\t{2}_edited_ali.fa\n".format(edited_ali.get_alignment_length(), len(edited_ali), arg.file))
+            out_file.write("{0}bp\t{1}\t{2}_edited_{3}_{4}_ali.fa\n".format(edited_ali.get_alignment_length(), len(edited_ali), arg.file, arg.window, arg.gappercent))
             out_file.write("alignment length reduced by {0}bp\n".format(original_ali.get_alignment_length() - edited_ali.get_alignment_length()))
             # Lists each unique gap-causing seq
             out_file.write("\n{0} seq(s) create problematic gaps:\n".format(len(seqs)))
@@ -91,20 +92,17 @@ def results_file(arg, original_ali, edited_ali, seqs):
                 unique_seqs.add(name)
             for seq in unique_seqs:
                 out_file.write("{0}\n".format(seq))
-            # Writes each gap-causing seq's problem positions
-            out_file.write("\nProblematic gaps are at these alignment positions:\n")
-            for name, value in seqs.items():
-                for seq_tuple in value:
-                    out_file.write("{0}:{1}\n".format(name, seq_tuple[0]))
     except IOError:
         print("An IO error occured.")
     print("Writing to output file complete.\n")
 
 # Store arguments for a FASTA-alignment file, window() parameters, and batch_files():
-parser = argparse.ArgumentParser(description="alignment_editor helps remove any massive gap-causing sequences from the 'hmmr_significant_hits_ali.fa' file produced in Step 5 of Phyfocus. Once editing is complete, constructing a ML phylogeny (Step 6) completes PhyFocus. NOTE: program must be run within the 'final_tree_dataset/filtering_output' directory.")
-parser.add_argument("file", help="submits a FASTA sequence file")
-parser.add_argument("--window", "-w", type=int, default=50, help="Specify the minimum gap length that is disruptive to the alignment. Default is 50bp, but an effective benchmark appears to be 4 percent of the alignment's total length. Manual assessment of the alignment is strongly recommended.")
+parser = argparse.ArgumentParser(description="alignment_editor helps remove any massive gap-causing sequences from the 'final_tree_seqs_ali.fa' file produced in Step 5 of Phyfocus. Once editing is complete, constructing a ML phylogeny (Step 6) completes PhyFocus. NOTE: A.editor must be run within the 'final_tree_dataset' directory. Output files are named after user parameters, so multiple -w and/or -g values may be tested rapidly.")
+parser.add_argument("--file", "-f", type=str, help="submits a FASTA sequence alignment")
+parser.add_argument("--window", "-w", type=int, default=100, help="Specify the minimum gap length that is disruptive to the alignment. Default is 100bp, but visual assessment of the alignment to determine a gap size is strongly recommended.")
 parser.add_argument("--gappercent", "-g", type=float, default=0.9, help="Specify the minimum percent of seqs that must contain -w size gaps to identify problematic seqs. Default is 0.9")
+parser.add_argument("--align", "-a", type=str, default="mafft --retree 2 --maxiterate 0", help="MAFFT method for making edited alignment. Default is 'mafft --retree 2 --maxiterate 0' (MAFFT's fast but rough 'FFT-NS-2' method) to enable quick review of different parameters. For a more rigorously accurate alignment, you should use <-a 'linsi'>.")
+parser.add_argument("--species", "-s", action="store_true", help="Quickly compares the edited alignment with the species included in the fixed_fastas directory to list which species (if any) were entirely removed. Uses the phyfocus subscript 'species_checker.sh'. Leave disabled for non-phyfocus applications.")
 args = parser.parse_args()
 
 
@@ -116,8 +114,11 @@ ali_object = (Bio.AlignIO.read("{0}".format(ali_fasta), "fasta"))
 gap_seqs = window(ali_object, args)
 
 # Generate edited MSA from original fasta file and convert to Bio.AlignIO object
-edited_ali_fasta = msa(args.file, seqs=gap_seqs)
+edited_ali_fasta = msa(args.file, args, seqs=gap_seqs)
 edited_ali_object = (Bio.AlignIO.read("{0}".format(edited_ali_fasta), "fasta"))
 
 # Write results to a results summary file
 results_file(args, ali_object, edited_ali_object, gap_seqs)
+subprocess.run("rm ./{0}_edited_{1}_{2}".format(args.file, args.window, args.gappercent), shell=True)
+if args.species:
+    subprocess.run("../subscripts/species_check.sh -f ./{0}_edited_{1}_{2}_ali.fa -o ./alignment_editor_{1}_{2}.out".format(args.file, args.window, args.gappercent), shell=True)
