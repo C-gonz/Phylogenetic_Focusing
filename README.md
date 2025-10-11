@@ -4,10 +4,14 @@ Phyfocus assesses the evolutionary history of target gene families, with an emph
 ![GPCR_classC_focused_tree](images/GPCR_classC_focused_tree.jpg)
 Example Phyfocus run investigating Taste 1 Receptor evolutionary relationships against 45 animal species. Visualized and annotated using FigTree v1.4.4.
 
-### The conceptional basis for Phyfocus
-All gene phylogenies are heavily impacted by what sequence data they are given to work with. As no phylogenetic approach can  make use of all the genomic data we have in a single gene tree, criteria must be established for excluding sequence data. In many approaches, this can include manually choosing which sequences go into a phylogenetic pipeline, using species datasets that are not genomic/proteomic, or imposing search algorithm limitations, such as limits on the number of BLAST hits allowed.
+<details> <summary><H1> Phyfocus Introduction </H1></summary>
 
-The concern with some of these limitations is that they may exclude sequence data not because it is irrelevant, but because it simply did not meet an arbitrary criteria (such as making a BLAST hit count). By making phylogenetic data itself the criteria for excluding sequences through focusing, Phyfocus aims to reduce the potential loss of novel evolutionary relationships while still making assessments of large gene families and many species feasible.
+### The conceptional basis for Phyfocus
+All gene phylogenies are heavily impacted by what sequence data they are given to work with. As no phylogenetic approach can  make use of all the genomic data we have in a single gene tree, criteria must be established for excluding sequence data. In many approaches, this can include manually choosing which sequences go into a phylogenetic pipeline, using species datasets that are not genomic/proteomic, or imposing search algorithm limitations, such as limits on the number of BLAST hits allowed. The concern with some of these limitations is that they may exclude sequence data not because it is irrelevant, but because it simply did not meet an arbitrary criteria (such as making a BLAST hit count). 
+
+Phyfocus makes phylogenetic data itself the criteria for excluding sequence data. Users specify gene sequences of interest (Targets) and distantly related sequences (Anchors) at the outset, along with even more distantly related sequences (Roots) for the unfocused phylogeny. Once the unfocused tree is rooted, the Most Recent Common Ancestor (MRCA) of the Targets and Anchors is extracted, providing a focused subtree.  
+
+By making phylogenetic data itself the criteria for excluding sequences through focusing, Phyfocus aims to reduce the potential loss of informative sequence data while still making assessments of large gene families and many species feasible.
 
 ### What Phyfocus is most helpful for:
 - Providing a pipeline for rigorous phylogenetics using proteomic data and a large number of species
@@ -22,15 +26,16 @@ The concern with some of these limitations is that they may exclude sequence dat
 ### The PhyFocus pipeline consists of 6 major Steps:
 1) Identifying a broad protein dataset for each species using highly permissive BLASTp search
 2) Filtering highly similar or uninformative seqs, aligning the data, and making an unfocused gene tree for each species
-3) Using user-specified seqs to extract a subtree containing the genes of interest (focusing) for each species
-4) Combining the species' focused tree seqs into a single dataset
+3) Focusing via user-specified Target & Anchor seqs to identify their MRCA and extract the focused subtree for each species
+4) Combining each species' focused subtree seqs into a single dataset
 5) Aligning the combined dataset, user-run inspection & editing with alignment_editor
 6) User-run final phylogeny creation
 ![visual_abstract](images/Phyfocus_visual_abstract.png)
- 
-# Running PhyFocus
+ </details> <!-- Phyfocus Introduction -->
 
-<details> <summary><H2> Dependencies & Setup </H2></summary>
+# Getting Started
+
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Dependencies & Setup </H2></summary>
 
 ### Timeframe, CPU, and RAM
 Phyfocus can be time and memory intensive; system parameters we use:
@@ -90,8 +95,55 @@ Programs Phyfocus requires in the user PATH
 - In this, "which python" and "python -m site" are particularly telling. if you do not see paths that denote "phyfocus_env" in them, your job request has not activated the correct environment and is likely running off its default Conda environment, resulting in possible dependency issues or unintended versions being used.  
 </details> <!-- End Dependencies & Setup -->
 
-<details> <summary><H2> Testing Installation </H2></summary>
-To quickly test if Phyfocus works properly, follow these steps after downloading the phyfocus package.
+
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Phyfocus Accessory Scripts & Subscripts </H2></summary>
+
+- Accessory Scripts are optionally run by the user to improve working with Phyfocus, and located in the accessory_scripts directory.  
+
+- Subscripts kept in the subscripts directory are required for Phyfocus but not run by the user, and are described here for informational purposes only.
+
+## Accessory Scripts
+
+1. Alignment_editor.py
+- The final task of Step 5 in the Phyfocus pipeline. Used to remove sequences in alignments that are causing massive gaps. Assesses this via user specified values for the minmum gap size that is problematic, and the minium percentage of seqs that must have that gap. 
+- Detailed usage instructions are in the "Running Phyfocus on Your Data > Executing alignment_editor.py (step 5)" section of this manual, and in the command line help menu via "./Alignment_editor.py -h".  
+
+2. download_formats.sh
+- For convenient file management and tracking, Phyfocus requires the user-provided sequence files for each species database to begin with the species' genus name. Download_formats was made to help make preping these files easier by automating the renaming process. 
+- Usage only requires a 2 column CSV file submitted via -f with the following info:
+
+        1st is the species' genus  
+        2nd is the download link (e.g. FTP) for the peptide dataset.  
+
+        An example line containing both columns:  
+        Saccoglossus,https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/003/605/GCF_000003605.2_Skow_1.1/GCF_000003605.2_Skow_1.1_protein.faa.gz
+  
+IMPORTANT: if you have more than 1 species from a given genus, you must distinguish the genus column. Example: Mus fernandoni & Mus musculus --> MusF & MusM
+
+- Instructions also available via command line help menu: "download_formats.sh -h"
+ 
+3. fasta_lengths.py
+ - A simple script that, when given a fasta file via -f, will remove any sequence shorter than the minium length given by the user through -c. This can be helpful in datasets that may contain drastic seq length differences, e.g. after trimming sequence alignments to contain only highly conserved residues. 
+
+4. phyfocus.yml
+- A YAML file that is used if you wish to install Phyfocus dependencies via Conda/Mamba environment. See Dependencies & Setup > Setup using Conda/Mamba for usage details.
+
+## Subscripts
+
+#### Tree_Editor.R
+Called by phyfocus.sh. Used to extract a focused subtree from the initial phylogeny for each study species (step 3), identified by finding the most recent common ancestor of the user-specified target and anchor sequences. The bait and anchor sequence headers are specified by the user via the TSV fasta headers file. 
+
+#### header_translator.py
+Called by phyfocus.sh. Produces a TSV correlating original BLAST sequence headers with the genus_#### headers used by phyfocus for all input sequence data. The TSV is also used automatically to add BLAST hit descriptions as a final column in each BLAST output file, and to the HMMR.
+
+#### species_check.sh
+Called by alignment_editor.py; provides additional data on taxa presence/absence that is appended to the results summary. 
+</details> <!-- End Phyfocus Accessory Scripts & Subscripts -->
+
+
+
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Testing Installation </H2></summary>
+To quickly test if Phyfocus works properly, follow these steps after downloading the phyfocus package. Note that changing directory or script names will likely break Phyfocus.
 
 1. Change your working directory to ./sample_data and ensure the following are present:
     - phyfocus.sh (current version)
@@ -114,78 +166,41 @@ In final_tree_dataset, the file "concat_tip_seqs_cdhit_ali.fa" should also conta
 </details> <!-- End Testing Installation -->
 
 
-<details> <summary><H2> Phyfocus Accessory Scripts & Subscripts </H2></summary>
-Accessory Scripts are optionally run by the user to improve working with Phyfocus, and located in the accessory_scripts directory. For usage instructions, See the relevant steps in the "Runnning Phyfocus on Your Data" section and/or check the script's help menu by using "script_name -h" while in the accessory_scripts directory.
+# Running Phyfocus on Your Data
 
-Subscripts kept in the subscripts directory are required for Phyfocus but not run by the user, and are described here for informational purposes only.
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> User Input-Data Setup </H2></summary>
+In addition to the Phyfocus package contents noted in "Testing Installation" above, ensure your working directory contains the following 4 (5 if HMMR is enabled) user-provided datasets.
 
-## Accessory Scripts
-
-1. Alignment_editor.py
-- The final task of Step 5 in the Phyfocus pipeline. Used to remove sequences in alignments that are causing massive gaps. Assesses this via user specified values for the minmum gap size that is problematic, and the minium percentage of seqs that must have that gap. Detailed usage instructions are in the "Running Phyfocus on Your Data > Executing alignment_editor.py (step 5)" section of this manual.  
-
-2. download_formats.sh
-- For convenient file management and tracking, Phyfocus requires the user-provided sequence files for each species database to begin with the species' genus name. Download_formats was made to help make preping these files easier by automating the renaming process. Usage only requires a 2 column CSV file with the following info:
-
-    -f CSV      
-        1st is the species' genus  
-        2nd is the download link (e.g. FTP) for the peptide dataset.  
-    An example line containing both columns:  
-    Saccoglossus,https://ftp.ncbi.nlm.nih.gov/genomes/all/GCF/000/003/605/GCF_000003605.2_Skow_1.1/GCF_000003605.2_Skow_1.1_protein.faa.gz
-
-IMPORTANT: if you have more than 1 species from a given genus, you must distinguish the genus column. Example:
-Mus fernandoni & Mus musculus --> MusF & MusM
-
- 
-3. fasta_lengths.py
- - A simple script that, when given a fasta file via -f, will remove any sequence shorter than the minium length given by the user through -c. This can be helpful in datasets that may contain drastic seq length differences, e.g. after trimming sequence alignments to contain only highly conserved residues. 
-
-4. phyfocus.yml
-- A YAML file that is used if you wish to install Phyfocus dependencies via Conda/Mamba environment. See Dependencies & Setup > Setup using Conda/Mamba for usage details.
-
-## Subscripts
-
-#### Tree_Editor.R
-Called by phyfocus.sh. Used to extract a focused subtree from the initial phylogeny for each study species (step 3), identified by finding the most recent common ancestor of the user-specified target and anchor sequences. The bait and anchor sequence headers are specified by the user via the TSV fasta headers file. 
-
-#### header_translator.py
-Called by phyfocus.sh. Produces a TSV correlating original BLAST sequence headers with the genus_#### headers used by phyfocus for all input sequence data. The TSV is also used automatically to add BLAST hit descriptions as a final column in each BLAST output file.
-
-#### species_check.sh
-Called by alignment_editor.py; provides additional data on taxa presence/absence that is appended to the results summary. 
-</details> <!-- End Phyfocus Accessory Scripts & Subscripts -->
-
-
-<details> <summary><H2> Running Phyfocus on Your Data </H2></summary>
-The following sections provide detail on user inputs, the 6 major steps of Phyfocus.
-
-<details> <summary><H4> User Input Data Setup </H4></summary>
-In addition to the Phyfocus package contents noted in "testing Installation" above, ensure your working directory contains the following 4 (5 if HMMR is enabled) user-provided datasets. Note that example user files can be seen in ./sample_data.
+- Example user files can be seen in ./sample_data. 
+- Note that while user files may differ, changing Phyfocus directory, script, or output file names will likely break the program. 
 
 1) A query fasta file containing protein sequences (Targets, + Anchors if desired) you wish to use for BLASTp queries (Step 1).
    - Targets are homologs of the specific gene(s) / gene family being studied.
-   - Anchors are homologs of gene(s) / gene families closely related to the targets, and together with Targets are used to focus each species' gene tree in Step 3. If BLASTing anchors is not desirable (e.g., doing so pulls massive gene families you do not want), they can be excluded from the query file.
+   - Anchors are homologs of gene(s) / gene families related to the Targets, and together with Targets are used to focus each species' gene tree in Step 3. If BLASTing Anchors is not desirable (e.g., doing so pulls massive gene families you do not want), they can be excluded from the query file.
    - All query proteins can come from a single organism, but broader sampling from taxa of interest may improve BLASTp hits.
-   - At least 2 sequences must be in this file (more are recommended).
+   - At least 2 sequences must be in this file.
 
 2) A directory of protein FASTA files for each species assessed in the phylogeny (Step 1).
-    - Provides the protein databases for each species that BLASTp will search query file seqs against
+    - Provides the protein databases for each species that BLASTp will search query file seqs against.
     - Protein sequences are ideally derived from whole-genome data or thorough transcriptomes.
-    - All FASTA file names MUST begin with the species' genus name and an underscore: "genus_" The accessory script "download_formats.sh" can automate this process.
+    - All FASTA file names MUST begin with the species' genus name and an underscore: "genus_" The accessory script "download_formats.sh" can automate this process.  
+     IMPORTANT: if you have more than 1 species from a given genus, you must distinguish the genus name. Example: Mus fernandoni & Mus musculus --> MusF & MusM
 
-3) An outgroups fasta file containing rooting sequences for all trees (steps 2 & 6), and anchor sequences to enable focusing (step 3).
+3) An outgroups fasta file containing Root sequences for all trees (steps 2 & 6), and Anchor sequences to enable focusing (step 3).
     - Roots represent 1 or more known outgroups to target AND anchor gene families.
     - There is a minimum of 2 sequences required for roots.
+    - Anchor and root sequences are best chosen by reference to previous phylogenies. If such are unavailable, or if proper roots and anchors for a given gene family are unknown, Phyfocus can be run using an arbitrary root and no focusing (see below).   
+
 
 4) A Tab Seperated Values (.tsv) file for phylogeny focusing (Step 3).
     - There should be no column or row headers in the table.
-    - Column 1 gives FASTA ">" header names for AT LEAST 2 root proteins from the roots fasta file.
-    - Column 2 gives FASTA ">" header names for AT LEAST 1 target and 1 anchor protein from the query fasta file. At least two of each is recommended.
+    - Column 1 gives FASTA ">" header names for AT LEAST 2 Root proteins from the roots fasta file.
+    - Column 2 gives FASTA ">" header names for AT LEAST 1 Target and 1 Anchor protein from the query fasta file. These enable focusing by identifying the MRCA of the focused subtree.
     - Below is the focus.tsv file used in sample_data for a phylogeny of taste receptors within the class-C GPCR family:
 
         ![focusing_TSV](images/sample_tsv.png)
                  
-    - Anchor and root sequences are best chosen by reference to previous phylogenies. The class-C GPCR example was informed by: Fredriksson, R., Lagerström, M. C., Lundin, L. G., & Schiöth, H. B. (2003). The G-protein-coupled receptors in the human genome form five main families. Phylogenetic analysis, paralogon groups, and fingerprints. Molecular pharmacology, 63(6), 1256-1272.
+    - If a no-focusing run is desired, ensure that the roots in column 1 are also included in column 2. The MRCA of any Targets/Anchors and the tree's Roots will always be the first node in a phylogeny, so the focused tree = the unfocused tree.  
 
 5) (Optional) A FASTA protein alignment including key conserved domains and motifs for HMMR filtering (Step 5).
     - An alignment of the query file can be used.
@@ -195,7 +210,7 @@ In addition to the Phyfocus package contents noted in "testing Installation" abo
 </details> <!-- End User Input Data Setup -->
 
 
-<details> <summary><H4> Running phyfocus.sh (steps 1-5) </H4></summary>
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Running phyfocus.sh (steps 1-5) </H2></summary>
 The main Phyfocus script automatically runs steps 1-5, with the user manually completing the alignment editing of Step 5 and final phylogeny construction in Step 6. 
 The following parameters info is also available in the phyfocus help menu (./phyfocus.sh -h)
 
@@ -207,7 +222,7 @@ Program syntax:
 
 #### REQUIRED ITEMS
 -q QUERY Fasta file containing peptides for BLASTp query that represent your targets of interest. Anchors may also be included  
--o OUT      Fasta file containing outgroup (anchor and rooting) peptides  
+-o OUT      Fasta file containing outgroup (anchor and rooting) sequences  
 -f FASTAS   Directory of peptide fasta files for each species in the desired phylogeny  
 -c CLADE    A .tsv file of fasta header names for root and target+anchor sequences  
 
@@ -242,7 +257,7 @@ A basic executing command using all default settings could be thus:
     ./phyfocus.sh -q ./query_file.fa -f fasta_proteins/ -r roots_file.fa -H hmmr_ali.fa -c focus_table.tsv
 </details> <!-- End Running phyfocus.sh (steps 1-5) -->
 
-<details> <summary><H4> Understanding Phyfocus-Generated Outputs </H4></summary>
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Understanding Phyfocus-Generated Outputs </H2></summary>
 Phyfocus will generate a number of directories and files. The below clarifies the directory outputs made by each step in chronological order.    
 
 Before Step 1: logs directory stores the following output records:  
@@ -282,7 +297,8 @@ B4. tree_editor_out directory
 
 Step 4) Concatenating per species focused datasets  
 A. tip_seqs directory
-- Contains the extracted fasta sequences present in each species' focused phylogeny
+- Contains the extracted fasta sequences present in each species' focused phylogeny  
+
 B. final_tree_dataset directory
 - Directory where all tip_seq files are combined into a final focused dataset. This is generally where alignment_editor is run by the user and the final IQtree run is conducted.  
  
@@ -292,7 +308,7 @@ Step 6) Generating final focused phylogeny
 </details> <!-- End Understanding Phyfocus-Generated Outputs -->
 
 
-<details> <summary><H4> Monitering output Data </H4></summary>
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Monitering output Data </H2></summary>
 Because Phyfocus can take days, assessing if the per-species blast (Step 1) is capturing too narrow or too broad a dataset for your phylogenies can save significant time. Two approaches can help here:  
 
 1. Examine the BLAST output files at ./blastout_tables. These have been edited to include the original header descriptions, allowing you to see what sequences given blast queries and the e-value cutoff are obtaining. A potential issue to look for here is if many gene family members from far outside your rooting seqs' gene family are being obtained. 
@@ -306,10 +322,14 @@ If the blast outputs and/or per-species trees indicate an issue with the dataset
 </details> <!-- End Monitering output Data -->
 
 
-<details> <summary><H4> Executing alignment_editor.py (step 5) </H4></summary>
-Once complete, ./phyfocus.sh produces an alignment that is the starting point of Step 6 (see "final_tree_dataset/final_tree_seqs_ali.fa"). It will also move alignment_editor.py to this directory for user convenience.
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Executing alignment_editor.py (step 5) </H2></summary>
+Once complete, ./phyfocus.sh produces an alignment that is the starting point of Step 5 (see "final_tree_dataset/concat_tip_seqs_cdhit_ali.fa"). 
 
-concat_tip_seqs_cdhit_ali.fa may contain massive gaps (100s+ in length) due to a small subset of sequences. To improve alignment quality, Alignment Editor removes these gap-causing sequences according to user-specified gap length and gap frequency cutoffs. Current recommendation is to manually inspect the concatenated alignment to identify an approximate size of massive gaps, then run alignment_editor.py. 
+concat_tip_seqs_cdhit_ali.fa may contain massive gaps due to a small subset of sequences. To improve alignment quality, Alignment Editor removes these gap-causing sequences according to user-specified gap length and gap frequency cutoffs. 
+
+- Current recommendation is to manually inspect the concatenated alignment to identify an approximate problematic gap size, then run alignment_editor.py 
+
+- Note that all output files incorporate the user values for -w and -g, so multiple runs to test different values can be executed without risk of overwriting or mixing outputs.
 
 Usage syntax and options for alignment_editor are also available under the help menu (./alignment_editor.py -h)
 
@@ -317,27 +337,66 @@ Usage syntax and options for alignment_editor are also available under the help 
 Program syntax: 
 ./alignment_editor.py  ./final_tree_seqs_ali.fa [-h] [-w num] [-g num] 
 
--h <help>   Display help and exit
+-h HELP       Display help and exit
 
--w <window> Specify the minimum gap length that is disruptive to the alignment. Default is 50bp, but an effective
-benchmark appears to be 4% of the alignment's total length. Manual assessment of the alignment
-is strongly recommended.
+-f FILE       Submits a FASTA sequence alignment
 
--g <gappercent> Specify the minimum percent of seqs that must contain -w size gaps to identify problematic seqs.
-Default is 0.9.
+-w WINDOW     Specify the minimum gap length that is disruptive to the alignment. Default is 50bp, but an effective  
+            benchmark appears to be 4% of the alignment's total length. Manual assessment of the alignment  
+                is strongly recommended.
+
+-g GAPPERCENT Specify the minimum percent of seqs that must contain -w size gaps to identify problematic seqs.  
+                Default is 0.9.
+
+-a ALIGN MAFFT method for making edited alignment. Default is 'mafft --retree 2 --maxiterate 0' (MAFFT's fast but rough 'FFT-NS-2' method) to enable quick review of different parameters. For a more rigorously accurate alignment, you should use -a 'linsi'.
+
+-s SPECIES Quickly compares the edited alignment with the species included in the fixed_fastas directory to list which species (if any) were entirely removed. Uses the phyfocus subscript 'species_checker.sh'. Leave
+                        disabled for non-phyfocus applications.
 
 -------------------------------------------------------------------------------------------------------------------------------
-Upon completing alignment_editor.py, running IQtree will complete Step 6 and produce the final focused phylogeny. Recommended command:
+Completing alignment_editor.py produces 2 output files: 
+
+- A log file denoting run parameters, changes in pre and post editing alignments, what seqs were removed, and a note on any missing species (if -s was used)
+- A new alignment based on the remaining seqs after editing.  
+
+Running IQtree on this new alignment will complete Step 6 and produce the final focused phylogeny. Recommended command:
 
     iqtree -s <alignment_editor_output_file.fa> -m MFP+C60 -alrt 1000 -bb 1000 -nt 24
 </details> <!-- End Executing alignment_editor.py (step 5) -->
 </details> <!-- End Running Phyfocus on Your Data -->
 
 
-<details> <summary><H2> Managing Errors & Reruns </H2></summary>
-Phyfocus (and programs it uses like IQtree) are designed to cancel the run if certain errors or issues occur. The out_log.txt file will indicate the last steps taken, while specific error messages are recorded in error_log.txt.
-Once the error has been dealt with, phyfocus.sh can be restarted at the last valid step by re-running the same command originally used, provided the contents of its working directory have not been changed by the user. The restarted run date and all steps skipped are always appended to the out_log.txt file before standard output logging resumes.
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Managing Errors & Reruns </H2></summary>
+Phyfocus (and programs it uses like IQtree) are designed to cancel the run if certain errors or issues occur. The out_log.txt file will indicate the last steps taken, while specific error messages are recorded in error_log.txt.  
 
+## Rerunning Phyfocus
+Phyfocus was made with several automatic checkpoints that check for the presence (and for per-species items, proper count) of output files during the 6 Steps. See "Phyfocus Basics" for a visual depiction of these checkpoints.
+
+Step 1: 
+- Check for creation of header_translation_table.tsv  
+- Check for creation of BLASTp results for all provided species  
+
+Step 2:
+- Check for creation of alignment files for all species with BLASTp hits
+- Check for creation of Iqtree files for all species with BLASTp hits  
+
+Step 3:
+- Check for creation of focused tips.txt files for all species with BLASTp hits
+
+Step 4:
+- Check file count for all tips.txt files
+- Check for concatenation of tips.txt files to make concat_tip_seqs_cdhit.fa
+
+Step 5:
+- Check for the alignment file concat_tip_seqs_cdhit_ali.fa 
+
+If any errors or other issues interrupt a Phyfocus run, Phyfocus can be rerun from the nearest checkpoint by simply resubmitting the original phyfocus run command used, provided the contents of the working directory have not been changed by the user.
+
+- The restarted run date and all steps skipped are always appended to the out_log.txt file before standard output logging resumes.
+
+- If your run was interrupted part way through a step (such as making the per species alignments), the checkpoint will restart that step from the beginning and overwrite any existing files.
+
+## Common Errors
 The following represent some errors you may encounter in error_log.txt, along with recommended solutions:
 
 #### Permissions denied. 
@@ -373,7 +432,7 @@ The following represent some errors you may encounter in error_log.txt, along wi
 
 # Assessing Phyfocus Phylogenies
 
-<details> <summary><H2> Fixing Target, Anchor, & Root Sequence Names in Your Tree </H2></summary>
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Fixing Target, Anchor, & Root Sequence Names in Your Tree </H2></summary>
 Once the combined dataset is made in Step 4 and run through CDHIT (./final_tree_dataset/concat_tip_seqs_cdhit.fa), it is likely the header names you originally provided for all target, anchor, and root sequences may have been replaced with phyfocus numerical headers. If the original header names for these known seqs are desired for tree annotations, Consider the following:  
 
 1. Identify which query/root seqs have had their headers changed. Use grep's -B and -A arguments to see which CDHIT cluster every user sequence belongs to (you may have to increase this number depending on how many seqs are in a given cluster).
@@ -388,7 +447,7 @@ Once the combined dataset is made in Step 4 and run through CDHIT (./final_tree_
 2. Change any numerical headers in "concat_tip_seqs_cdhit_ali.fa" that replaced the desired query/root headers. (Using find/replace via a word processor is a simple approach.) Note that you can fix these headers at any time; however, fixing them before using alignment_editor and making any final Step 6 phylogenies ensures you only have to correct it once. 
 </details> <!-- End Fixing Target, Anchor, & Root Sequence Names in Your Tree -->
 
-<details> <summary><H2> Viewing & Annotating Phylogenies </H2></summary>
+<details> <summary>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<H2> Viewing & Annotating Phylogenies </H2></summary>
 The Newick formatted data in the step 6 .treefile can be copied into a viewer like FigTree for rooting with the root sequences clade and annotating features of interest. 
 (Rambaut, A. (2018) FigTree v1. 4.4: a graphical viewer of phylogenetic trees. Available from http://tree.bio.ed.ac.uk/software/figtree/.)      
 
@@ -416,16 +475,16 @@ The Ultrafast bootstrap and SH-aLRT node values provided by IQtree indicate whic
     - Do not close the .treefile window after exporting
 
 2. Change UFboot/SH-aLRT values to 1 value per column
-- Open exported .txt in excel/numbers as TSV
-- Change the label column header to "UF-Boot" and add a new column: "SH-aLRT"
-- Export table as CSV
-- Open CSV in a text editor, use find+replace to change all "/" to ","
-- Open CSV in excel/numbers again, delete the empty column at right.
+    - Open exported .txt in excel/numbers as TSV
+    - Change the label column header to "UF-Boot" and add a new column: "SH-aLRT"
+    - Export table as CSV
+    - Open CSV in a text editor, use find+replace to change all "/" to ","
+    - Open CSV in excel/numbers again, delete the empty column at right.
 
 3. Collapse Phylogeny based on node support
-- import CSV into the open Tree Graph 2 window via "import table as node/branch data" (all files format, no skipped lines, first line contains headers. Be sure to check values separated by ",")
-- "select matching key columns" step correlates same data in the table and tree. Use unique node names column for both.
-- Set node data type for UFboot and SH-aLRT as "new hidden branch data with specified ID." 
-- Use "Collapse Nodes by Support" option twice: UFBoot at 95, and SH-aLRT at 80. 
-- Export result as a nexus file, the collapsed tree can now be viewed or edited in Figtree, etc. as before.
+    - import CSV into the open Tree Graph 2 window via "import table as node/branch data" (all files format, no skipped lines, first line contains headers. Be sure to check values separated by ",")
+    - "select matching key columns" step correlates same data in the table and tree. Use unique node names column for both.
+    - Set node data type for UFboot and SH-aLRT as "new hidden branch data with specified ID." 
+    - Use "Collapse Nodes by Support" option twice: UFBoot at 95, and SH-aLRT at 80. 
+    - Export result as a nexus file, the collapsed tree can now be viewed or edited in Figtree, etc. as before.
 </details> <!-- End Viewing & Annotating Phylogenies -->
