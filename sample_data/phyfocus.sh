@@ -361,7 +361,7 @@ mkdir ../align_species
 mv ./*ali.fa ../align_species
 #rm ./*ancrs ./*hmmrsearch_table.txt ./temp* ./HMMR_removed_seqs.txt ./*_hmmrsearch_temp.txt
 rm ./*ancrs ./temp* ./HMMR_removed_seqs.txt ./*_hmmrsearch_temp.txt
-echo "Moved $(ls ../align_species/*ali.fa | wc -l) species' MAFFT linsi alignments to ./align_species" | tee -a ../logs/summary_log.txt ../logs/out_log.txt
+echo "Moved $(ls ../align_species/*ali.fa | wc -l) species' alignments to ./align_species" | tee -a ../logs/summary_log.txt ../logs/out_log.txt
 cd ..
 }
 step2_initial_trees() {
@@ -525,7 +525,7 @@ then
     step2_initial_alignments
     # error checkpoint
     if [[ $(ls ./hits_fasta/*FIX_hits.fa | wc -l) == $(ls ./align_species/*_ali.fa | wc -l) ]]; then echo "Step 2 species' peptide alignments complete" | tee -a ./logs/out_log.txt; else echo "Step 2 species' peptide alignments incomplete (alignments not made for every species)." >> ./logs/error_log.txt; exit 1; fi
-    echo "PhyFocus elapsed time:" $((($SECONDS/60))) "minutes ($((($SECONDS/60)/60)) hours)" | tee -a ./logs/out_log.txt; echo " " | tee -a ./logs/out_log.txt; echo " " | tee -a ./logs/summary_log.txt ./logs/out_log.txt
+    echo "PhyFocus elapsed time:" $((($SECONDS/60))) "minutes ($((($SECONDS/60)/60)) hours)" | tee -a ./logs/summary_log.txt ./logs/out_log.txt; echo " " | tee -a ./logs/summary_log.txt ./logs/out_log.txt; echo " " | tee -a ./logs/summary_log.txt ./logs/out_log.txt
 else
     echo "Restarted Phyfocus run: skipped Step 2 species' peptide alignments" | tee -a ./logs/summary_log.txt ./logs/out_log.txt
 fi
