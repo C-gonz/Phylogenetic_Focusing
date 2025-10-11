@@ -263,6 +263,7 @@ Phyfocus will generate a number of directories and files. The below clarifies th
 Before Step 1: logs directory stores the following output records:  
 - out_log.txt = the main log for phyfocus and dependecy program statements
 - summary_log.txt = A more user-friendly out_log that excludes dependency output and notes major Phyfocus step outputs and elapsed time statements.
+- alignment_log.txt = MAFFT-specific message outputs from Step 2 and Step 5; placed in their own log given verbosity. Note if MAFFT's auto program is used, this is the only log that will report its chosen methodology. Contains text referrencing which Phyfocus Step and species is being processed for easier lookup of specific alignments. 
 - error_log.txt = error reports from many phyfocus or dependency issues
 - header_translation_table.tsv = a lookup table that correlates original sequence header info with the numerical headers used by Phyfocus 
 - HMMR_removed_seqs_info.txt = A header list of all seqs removed by HMMR filtering, if used
