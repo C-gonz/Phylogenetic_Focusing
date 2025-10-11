@@ -13,7 +13,8 @@ Syntax:
 -h <help>   Display this help and exit
 
 REQUIRED ITEMS
--q QUERY    Fasta file containing peptides for BLASTp query that represent your targets of interest. Anchors may also be included
+-q QUERY    Fasta file containing peptides for BLASTp query that represent your targets of interest.
+            Anchors may also be included
 -o OUT      Fasta file containing outgroup (anchor and rooting) peptides
 -f FASTAS   Directory of peptide fasta files for each species in the desired phylogeny
 -c CLADE    A .tsv file of fasta header names for root and target+anchor sequences
@@ -26,11 +27,14 @@ OPTIONAL RUN PARAMETERS
 OPTIONAL ALIGNMENT & TREE PARAMETERS
 -a ALIGN1   MAFFT method for Step2 unfocused species alignments. Default is "linsi" but the fast progressive
             method FFT-NS-2 (enter "mafft --retree 2 --maxiterate 0") can be used for testing. Include the
-            quotes. See the MAFFT website for additional options. Note using 'mafft' for the auto select option may not record the specific method used in the.
+            quotes. See the MAFFT website for additional options. Using 'mafft' alone enables MAFFT
+            to auto select a method.
 -A ALIGN2   MAFFT method for Step4 combined species alignment. Default and alternatives same as for -a ALIGN1
 -m MODEL    Peptide substitution model used by IQTree. Recommend LG for quick testing. Default = MFP+C60
--b BOOT     Number of Ultrafast Bootstrap replicates used by IQTree. Minimum value is 1000. Ignore this option for faster but less accurate trees.
--s SHALRT   Number of SH-aLRT Bootstrap replicates used by IQTree. Minimum value is 1000. Ignore this option for faster but less accurate trees.
+-b BOOT     Number of Ultrafast Bootstrap replicates used by IQTree. Minimum value is 1000.
+            Ignore this option for faster but less accurate trees.
+-s SHALRT   Number of SH-aLRT Bootstrap replicates used by IQTree. Minimum value is 1000.
+            Ignore this option for faster but less accurate trees.
 
 ADDITIONAL USES
 -F FORCE    Forces phyfocus to rerun at one of the following checkpoints.
@@ -38,9 +42,11 @@ ADDITIONAL USES
                 S2t = Step 2 (trees), remake per-species unfocused trees
                 S3  = Step 3 (focusing), remake per-species focused trees
                 S4  = Step 4 (extract and combine), remake combined dataset for final tree
-            Note: -F reruns delete all pre-existing output that comes after the chosen checkpoint, then runs phyfocus as normal.
+            Note: -F reruns delete all pre-existing output that comes after the chosen checkpoint,
+                  then runs phyfocus as normal.
 -T TEST     Run while in ./sample_data to test dependencies and demo the program. Command =
-            "./phyfocus.sh -q ./query_seqs.fa -f fasta_proteins -o outgroups.fa -H query_seqs_ali.fa -c focus_table.tsv -a 'mafft --retree 2 --maxiterate 0' -A 'mafft --retree 2 --maxiterate 0' -m LG"
+            "./phyfocus.sh -q ./query_seqs.fa -f fasta_proteins -o outgroups.fa -H query_seqs_ali.fa 
+            -c focus_table.tsv -a 'mafft --retree 2 --maxiterate 0' -A 'mafft --retree 2 --maxiterate 0' -m LG"
 -X CLEAN    Removes all phyfocus output files in the current working directory.
 
 ----------------------------------------------
@@ -81,7 +87,7 @@ PhyFocus requires four user-provided datasets (5 if HMMER is used):
    - There is a minimum of 2 for target + anchor sequences (more are recommended).
 
 2) A directory of protein FASTA files for each species assessed in the phylogeny (Step 1).
-   - All FASTA file names MUST begin with the species' genus name and underscore: genus_
+   - All FASTA file names MUST begin with the species genus name and underscore: genus_
    - NOTE: if using multiple species from 1 genus, you must distinguish the file names:
      E.g.: Canis lupes & Canis Familiaris --> CanisL_file & CanisF_file
    - The included "download_formats.sh" script helps automate this process (see ./download_formats.sh -h for details)
@@ -90,14 +96,16 @@ PhyFocus requires four user-provided datasets (5 if HMMER is used):
    - Only for HMMER filtering; can be ignored if HMMER is not being used.
    - Can be a rigorous alignment of the query sequences, but a more thorough profile may perform better.
 
-4) A fasta file containing outgroup proteins to root the per-species trees (root seqs) and to focus these trees down to your target gene family of interest (anchor seqs) (Steps 2 & 3).
+4) A fasta file containing outgroup proteins to root the per-species trees (root seqs) and to focus these
+   trees down to your target gene family of interest (anchor seqs) (Steps 2 & 3).
    - A minimum of 2 sequences for roots is required
    - Only 1 anchor sequence is required, but more can be used.
 
 5) A Tab Seperated Values (.tsv) file to guide phylogenetic focusing (Step 3).
    - There should be no column or row headers in the table.
    - Column 1 gives FASTA header names (no ">") for AT LEAST 2 root proteins from the outgroup file.
-   - Column 2 gives FASTA header names (no ">") for target proteins from the query file, and anchor proteins from the outgroup file. AT LEAST 2 sequences total is required.
+   - Column 2 gives FASTA header names (no ">") for target proteins from the query file, and anchor
+     proteins from the outgroup file. AT LEAST 2 sequences total is required.
 
 EOF
 }
