@@ -26,7 +26,7 @@ OPTIONAL RUN PARAMETERS
 OPTIONAL ALIGNMENT & TREE PARAMETERS
 -a ALIGN1   MAFFT method for Step2 unfocused species alignments. Default is "linsi" but the fast progressive
             method FFT-NS-2 (enter "mafft --retree 2 --maxiterate 0") can be used for testing. Include the
-            quotes. See the MAFFT website for additional options.
+            quotes. See the MAFFT website for additional options. Note using 'mafft' for the auto select option may not record the specific method used in the.
 -A ALIGN2   MAFFT method for Step4 combined species alignment. Default and alternatives same as for -a ALIGN1
 -m MODEL    Peptide substitution model used by IQTree. Recommend LG for quick testing. Default = MFP+C60
 -b BOOT     Number of Ultrafast Bootstrap replicates used by IQTree. Minimum value is 1000. Ignore this option for faster but less accurate trees.
@@ -39,7 +39,8 @@ ADDITIONAL USES
                 S3  = Step 3 (focusing), remake per-species focused trees
                 S4  = Step 4 (extract and combine), remake combined dataset for final tree
             Note: -F reruns delete all pre-existing output that comes after the chosen checkpoint, then runs phyfocus as normal.
--T TEST     Run while in ./sample_data to test dependencies and demo the program
+-T TEST     Run while in ./sample_data to test dependencies and demo the program. Command =
+            "./phyfocus.sh -q ./query_seqs.fa -f fasta_proteins -o outgroups.fa -H query_seqs_ali.fa -c focus_table.tsv -a 'mafft --retree 2 --maxiterate 0' -A 'mafft --retree 2 --maxiterate 0' -m LG"
 -X CLEAN    Removes all phyfocus output files in the current working directory.
 
 ----------------------------------------------
@@ -103,6 +104,8 @@ EOF
 
 # Function for running a test demo of phyfocus using provided data
 test() {
+echo "Runnning Phyfocus using:"
+echo "./${0##*/} -q ./query_seqs.fa -f fasta_proteins -o outgroups.fa -H query_seqs_ali.fa -c focus_table.tsv -a 'mafft --retree 2 --maxiterate 0' -A 'mafft --retree 2 --maxiterate 0' -m LG"
 ./${0##*/} -q ./query_seqs.fa -f fasta_proteins -o outgroups.fa -H query_seqs_ali.fa -c focus_table.tsv -a "mafft --retree 2 --maxiterate 0" -A "mafft --retree 2 --maxiterate 0" -m LG
 }
 
@@ -327,8 +330,8 @@ then
         # Concatenate HMMER hits with outgroups+queries, align via MAFFT
         echo | tee -a ../logs/out_log.txt; echo "Concatenating seqs from ../queries_and_outs.fa & ./${fasta%.}_hmmr_significant_hits.fa ..." | tee -a ../logs/out_log.txt
         cat ../queries_and_outs.fa ././${fasta%.}_hmmr_significant_hits.fa > ${fasta%.}_bts_ancrs 2>> ../logs/error_log.txt
-        echo "Aligning concatenated seqs for Step 2 initial phylogeny with MAFFT linsi ..." | tee -a ../logs/out_log.txt; echo | tee -a ../logs/out_log.txt; echo | tee -a ../logs/out_log.txt
-        $ALIGN1 ${fasta%.}_bts_ancrs > ${fasta%.}_ali.fa
+        echo "Aligning concatenated seqs for Step 2 initial phylogeny with $ALIGN1 to make ${fasta%.}_ali.fa ..." | tee -a ../logs/out_log.txt ../logs/alignment_log.txt; echo | tee -a ../logs/out_log.txt ../logs/alignment_log.txt; echo | tee -a ../logs/out_log.txt ../logs/alignment_log.txt
+        $ALIGN1 ${fasta%.}_bts_ancrs > ${fasta%.}_ali.fa 2>> ../logs/alignment_log.txt
         # Error check: alignment made
         if [[ ! (-s ${fasta%.}_ali.fa) ]]; then echo "Error aligning the concatenated file comprising ./queries_and_outs.fa and cdhit results (${fasta}*cdhit); examine files in hits_fasta/ and ensure MAFFT is working." 2>> ../logs/error_log.txt; exit 1; fi
         # Record what seqs HMMER removed per species
@@ -350,8 +353,8 @@ else
         # Concatenate cd-hit results with outgroups+queries, align via MAFFT
         echo | tee -a ../logs/out_log.txt; echo "Concatenating seqs from ../queries_and_outs.fa & ./${fasta%.}_cdhit ..." | tee -a ../logs/out_log.txt
         cat ../queries_and_outs.fa ./${fasta%.}_cdhit > ${fasta%.}_bts_ancrs 2>> ../logs/error_log.txt
-        echo "Aligning concatenated seqs for Step 2 initial phylogeny with MAFFT linsi ..." | tee -a ../logs/out_log.txt; echo | tee -a ../logs/out_log.txt; echo | tee -a ../logs/out_log.txt
-        $ALIGN1 ${fasta%.}_bts_ancrs > ${fasta%.}_ali.fa
+        echo "Aligning concatenated seqs for Step 2 initial phylogeny with $ALIGN1 to make ${fasta%.}_ali.fa ..." | tee -a ../logs/out_log.txt ../logs/alignment_log.txt; echo | tee -a ../logs/out_log.txt ../logs/alignment_log.txt; echo | tee -a ../logs/out_log.txt ../logs/alignment_log.txt
+        $ALIGN1 ${fasta%.}_bts_ancrs > ${fasta%.}_ali.fa 2>> ../logs/alignment_log.txt
         # Error check: alignment made
         if [[ ! (-s ${fasta%.}_ali.fa) ]]; then echo "Error aligning the concatenated file comprising ./queries_and_outs.fa and cdhit results (${fasta}*cdhit); examine files in hits_fasta/ and ensure MAFFT is working." 2>> ../logs/error_log.txt; exit 1; fi
     done
@@ -462,8 +465,8 @@ step5_final_align() {
 echo -------------------------------- | tee -a ./logs/out_log.txt
 echo "STEP 5: FILTERING CONCATENATED DATASET: ALIGNMENT EDITING ..." | tee -a ./logs/summary_log.txt ./logs/out_log.txt ./logs/error_log.txt
 cd ./final_tree_dataset
-echo "Step 5 aligning concat_tip_seqs_cdhit.fa with the chosen MAFFT option..." | tee -a ../logs/out_log.txt
-$ALIGN2 concat_tip_seqs_cdhit.fa > concat_tip_seqs_cdhit_ali.fa
+echo "Step 5 aligning concat_tip_seqs_cdhit.fa with $ALIGN2 to make concat_tip_seqs_cdhit_ali.fa ..." | tee -a ../logs/out_log.txt ../logs/alignment_log.txt
+$ALIGN2 concat_tip_seqs_cdhit.fa > concat_tip_seqs_cdhit_ali.fa 2>> ../logs/alignment_log.txt
 cd ..
 }
 
