@@ -448,12 +448,11 @@ do
     cat temp_query2 temp_R | sort > temp_focused
     comm -23 ./temp_unfocused ./temp_focused > focus_removed_TEMP.txt
     count=$(grep -w -f focus_removed_TEMP.txt ../../../logs/header_translation_table.tsv | wc -l)
-    echo "Focusing removed $count sequences from $file..." >> focus_removed_seqs.txt
-    grep -w -f focus_removed_TEMP.txt ../../../logs/header_translation_table.tsv >> focus_removed_seqs.txt
-    mv ./focus_removed_seqs.txt ../../../logs
+    echo "Focusing removed $count sequences from $file..." >> ../../../logs/focus_removed_seqs.txt
+    grep -w -f focus_removed_TEMP.txt ../../../logs/header_translation_table.tsv >> ../../../logs/focus_removed_seqs.txt
 done
 # Organize extracted tipseq fastas
-rm ./temp*
+rm ./temp* ./focus_removed_TEMP.txt
 cd ../../../; mkdir ./tip_seqs; mv ./align_species/IQ_out_species/tree_editor_out/*_tipseqs.fa ./tip_seqs
 }
 step4_concatenate_seqs() {
